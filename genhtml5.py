@@ -16,7 +16,7 @@ class WebSite:
     #globals
     firstpage='index'
 
-    def __init__(self,name='Example', logofile='logo.svg',
+    def __init__(self,name='Example', logofile='images/logo.svg',
                  cssfile='styles.css', language='fr'):
 
         self.name=name
@@ -55,11 +55,11 @@ class WebSite:
         el=page.doc['pageheader']
         nav=etree.SubElement(el,'nav')
         nav.set('id','mainnav')
-
+        home = etree.SubElement(nav,'a',href=f'{WebSite.firstpage}.html')
+        logo = etree.parse(self.logofile)
+        home.append(logo.getroot())
+        
         ul=etree.SubElement(nav,'ul')
-        linkli = etree.SubElement(ul,'li')
-        link = etree.SubElement(linkli,'a',href=f'{WebSite.firstpage}.html')
-        link.text='home'
 
         for k,v in self.pages.items():
             if k != WebSite.firstpage:
