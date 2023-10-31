@@ -55,6 +55,7 @@ class Conteneur(object):
                 li=etree.SubElement(table, 'li')
                 a=etree.SubElement(li,'a',href=f'#{lien}',title=f'Aller à {titre[0].text}')
                 a.text=titre[0].text
+        
         self.root.insert(0,table)
 
     def __repr__(self):

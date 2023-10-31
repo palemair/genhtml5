@@ -1,9 +1,9 @@
-<svg class="logo" width="190" height="32" 
-     version="1.1"
-     baseProfile="full"
-     xmlns="http://www.w3.org/2000/svg">
-    
-    <rect x="2" y="10" width="20" height="20" rx="2" stroke="green" fill="transparent"/> 
-    <circle cx="12" cy="20" r="5" fill="green"/> 
-    <text id='montexte' x="35" y="30" font-family="arial" font-size="18" text-anchor="start" >LOREM IPSUM</text>
+<svg class="logo" width="178" height="21" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <rect transform="scale(1,-1)" x=".6" y="-21" width="20" height="20" rx="2" fill="none" stroke="#8b2740" stroke-miterlimit="5" stroke-width="1.2" style="paint-order:markers stroke fill"/>
+    <g>
+        <circle cx="7.7" cy="6.9" r="5" fill="#df2428" opacity=".5"/>
+        <circle cx="11" cy="13" r="5" fill="#741e20" opacity=".5"/>
+        <circle cx="14" cy="8.6" r="5" fill="#de8a8c" opacity=".5"/>
+    </g>
+    <text id="montexte" transform="scale(1 1)" x="21.727583" y="19.182117" font-family="'URW Gothic'" font-size="24px" stroke-width=".94" style="font-variant-caps:normal;font-variant-east-asian:normal;font-variant-ligatures:normal;font-variant-numeric:normal">LOREM IPSUM</text>
 </svg>

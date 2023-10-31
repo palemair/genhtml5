@@ -10,8 +10,7 @@ from conteneur import Conteneur,Section,Article,Aside,Figure
 class WebSite:
     """ Website object: it contains the logo, name of the project,
         directory where to put the files, the used language, the name of
-        the css file,
-        and the authors informations. """
+        the css file, and the authors informations. """
 
     #globals
     firstpage='index'
@@ -33,8 +32,7 @@ class WebSite:
     def add_page(self, title):
         """Add a simple web page. """
 
-        p = Page(title)
-        self.pages[title] = p
+        p= self.pages[title] = Page(title)
 
         return p
 
@@ -54,8 +52,7 @@ class WebSite:
         #header of the page
         el=page.doc['pageheader']
         nav=etree.SubElement(el,'nav')
-        nav.set('id','mainnav')
-        home = etree.SubElement(nav,'a',href=f'{WebSite.firstpage}.html')
+        home = etree.SubElement(nav,'a',href=f'{WebSite.firstpage}.html',title='home')
         logo = etree.parse(self.logofile)
         home.append(logo.getroot())
         
@@ -156,7 +153,6 @@ class Page():
 if __name__ == '__main__' :
 
     site=WebSite(cssfile='styles.css')
-
     home=site.get_home()
 
     top=Aside({'id':'top'})
@@ -169,9 +165,13 @@ if __name__ == '__main__' :
     section1=Section()
     
     article1=Article()
-    article1.add_md_content('Markdown/article1.md','a1')
+    article1.add_md_content('Markdown/article1.md','div')
+
+    article2=Article()
+    article2.add_md_content('Markdown/article2.md','div')
 
     section1.add_conteneur(article1)
+    section1.add_conteneur(article2)
 
     section1.add_list_link_element('article')
 
