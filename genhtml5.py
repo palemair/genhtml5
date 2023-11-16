@@ -87,7 +87,7 @@ class WebSite:
             outfile=Path.cwd() / f'{name}.html'
             outfile.write_text(texte)
 
-    def __str__(self):
+    def __repr__(self):
 
         for page in self.pages:
             return str(self.pages)
@@ -155,4 +155,8 @@ class Page():
 
 if __name__ == '__main__' :
     
-    pass
+    site=WebSite()
+    A=Page('arp')
+    site.add_page(A)
+    print(A)
+    print(site)
