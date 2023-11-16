@@ -81,7 +81,7 @@ class WebSite:
         for name,page in self.pages.items():
             self._builder_page(page)
             texte=tostring(page.doc['html'],
-                           pretty_print=True,
+                           pretty_print=False,
                            doctype='<!DOCTYPE html>',
                            encoding='unicode')
             outfile=Path.cwd() / f'{name}.html'
@@ -143,10 +143,10 @@ class Page():
             else:
                 print("Not a valid container !!")
 
-    def __repr__(self):
+    def __str__(self):
 
         return str(tostring(self.doc['body'],
-                      pretty_print=False,
+                      pretty_print=True,
                       doctype='<!DOCTYPE html>',
                       encoding='unicode'))
 
@@ -154,63 +154,5 @@ class Page():
 #program
 
 if __name__ == '__main__' :
-
-    site=WebSite(cssfile='styles.css')
-    home=site.get_home()
-
-    top=Aside({'id':'top'})
-    top.add_md_content('Markdown/pageheader.md',tag='div')
-    home.add_conteneur(top)
-
-    blog=site.add_page('Blog')
-   
-
-
-    concept=site.add_page('Concept')
-
-    section1=Section()
-    section2=Section()
     
-    section1.add_md_content('Markdown/article2.md',
-                            'Markdown/article1.md',
-                            'Markdown/article3.md', tag = 'article')
-
-    
-    B=Graphic({'class':'graph'})
-    
-    liste=[]
-
-    with open('listeDC','r') as f:
-        for x in f:
-            a=int(x)
-            liste.append(a)
-
-    popdep=[]
-
-    with open('liste.txt','r') as f:
-        for l in f:
-            x=int(l[4:].rstrip())
-            popdep.append(x)
-
-    dcpop=[100 *x/y for x,y in zip(liste,popdep)]
-
-    dico=dict()
-    indice=1 
-    for element in dcpop:
-        x='{!s:0>2}'.format(indice) 
-        dico[x]=element
-        indice+=1
- 
-    B.frmap('décès par département 2022',dico)
-
-    section1.add_conteneur(B)
-
-    Y=Figure({'id':'test'},('photo','La plus belle'),{'class':'test-pic','src':'images/img_2.jpg','alt':'image de montagne'})
-    
-    graph1=Graphic({'class':'graph'},('graphic','répartition du prix'))
-    graph1.bar({'test':[23,45,54,65,76,23]})
-    section2.add_conteneur(Y,graph1)
-    blog.add_conteneur(section1,section2)
-
-    site.write_to_file()
-    
+    pass
