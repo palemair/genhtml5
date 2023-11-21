@@ -5,8 +5,9 @@ from lxml.html import tostring, fragment_fromstring
 from lxml import etree
 from markdown import markdown
 from pathlib import Path
+from conteneurmixin import Mixconteneur
 
-class Conteneur(object):
+class Conteneur(Mixconteneur):
     "HTML conteneur : section, article, aside...."
     
     def __init__(self,tag: str, attrib: dict = None):
@@ -17,31 +18,9 @@ class Conteneur(object):
                 elt.set(arg,value)
         self.root = elt
 
-    def add_conteneur(self,*conteneurs):
-        
-        for conteneur in conteneurs:
-            self.root.append(conteneur.root)
-
-    def add_md_content(self,*inputfile: any, tag: str = None, tag_attr: str=None):
-        
-	    if tag is not None :
-	        balise=tag
-	    else:
-	        balise=False
-
-	    for file in inputfile :
-	        infile=Path(file)
-	        contenu=infile.read_text(encoding='UTF8')
-	        md=fragment_fromstring(markdown(contenu,extensions=['extra']),create_parent=balise)
-	
-	        if tag_attr is not None : 
-	            html.set('id',tag_attr)
-	        self.root.append(md)
-    
     def __repr__(self):
 
         return str(tostring(self.root,encoding='unicode',pretty_print=True))
-
 
 class Section(Conteneur):
     
@@ -77,8 +56,7 @@ class Figure(Conteneur):
             fc.text=self.caption[1]
             self.root.append(fc)
     
-
-class Image(Figure):
+class Img(Figure):
 
     def __init__(self,attrib: dict = None, caption:tuple= None,imgdatas:dict = None):
 
@@ -157,7 +135,7 @@ if __name__ == '__main__' :
     graph1.bar({'test':[23,24,45,45,34]})
 
     graph2=Graphic({'id':'graph-2'},('carte','Répartition des autres'))
-    photo=Image(None,('image','Un beau soleil'),{'src':'images/grass.jpg'})
+    photo=Img(None,('image','Un beau soleil'),{'src':'images/grass.jpg'})
     
     partie1.add_conteneur(photo,graph1,graph2)
 

@@ -5,7 +5,7 @@ from lxml.html import fromstring, tostring, fragment_fromstring
 from lxml import etree
 from markdown import markdown
 from pathlib import Path
-from conteneur import Section,Article,Aside,Graphic
+from conteneur import Conteneur,Section,Article,Aside,Graphic
 
 class WebSite:
     """ Website object: it contains the logo, name of the project,
@@ -90,9 +90,9 @@ class WebSite:
 
     def __repr__(self):
 
-        return str(self.pages.keys())
+        return str(self.__dict__)
 
-class Page():
+class Page(Conteneur):
 
     """Simple html page object"""
 
@@ -100,6 +100,7 @@ class Page():
 
         self.title=title
         self.doc=self._builder()
+        self.root=self.doc['main']
 
     def _builder(self):
 
@@ -116,48 +117,6 @@ class Page():
                 'main':main,
                 'pageheader':header,
                 'pagefooter':footer}
-
-    def _link_list(self, elt : str = 'article', target :str = 'h2'):
-        """create linked element list from an element """
-
-        div = etree.Element('div')
-        liste_elt = [ elt for elt in self.doc['main'].iterfind(f'.//{elt}') ]
-        
-        for elt in liste_elt:
-            titre= elt.find(f'.//{target}')
-            if titre is not None :
-                elt.set('id',titre.text)
-                a=etree.SubElement(div,'a',href=f'{self.title}.html#{titre.text}',title=f'Aller à {titre.text}')
-                a.text=titre.text
-
-        return div
-
-    def add_conteneur(self,*conteneurs):
-
-        for conteneur in conteneurs:
-
-            if isinstance(conteneur,Conteneur):
-
-                el=conteneur.root
-                self.doc['main'].append(conteneur.root)
-            else:
-                print("Not a valid container !!")
-
-    def add_mdcontent(self,*inputfile: any, tag: str = None, tag_attr: str=None):
-        
-	    if tag is not None :
-	        balise=tag
-	    else:
-	        balise=False
-
-	    for file in inputfile :
-	        infile=Path(file)
-	        contenu=infile.read_text(encoding='UTF8')
-	        md=fragment_fromstring(markdown(contenu,extensions=['extra']),create_parent=balise)
-	
-	        if tag_attr is not None : 
-	            html.set('id',tag_attr)
-	        self.doc['main'].append(md)
 
     def __str__(self):
 
@@ -176,6 +135,8 @@ if __name__ == '__main__' :
     site.add_page(A,'test')
     page1=site.get_page('index')
     page1.add_conteneur(Section(),Article())
+    page1.add_mdcontent('Markdown/article.md',tag='article')
+
     print(page1)
     print(site)
     site.write_to_file()
