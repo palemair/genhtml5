@@ -63,20 +63,13 @@ class Aside(Conteneur):
 
 class Figure(Conteneur):
     
-    def __init__(self,attrib: dict = None, caption:tuple= None, imgdatas: dict = None):
+    def __init__(self,attrib: dict = None, caption:tuple= None):
 
         super().__init__('figure',attrib)
-        self.imgdatas = imgdatas
         self.caption = caption
         self.__initialize()
 
     def __initialize(self):
-        
-        if self.imgdatas is not None:
-            elt=etree.Element('img')
-            for k,v in self.imgdatas.items():
-               elt .set(k,v)
-            self.root.append(elt)
         
         if self.caption is not None:
             fc=etree.Element('figcaption')
@@ -85,6 +78,22 @@ class Figure(Conteneur):
             self.root.append(fc)
     
 
+class Image(Figure):
+
+    def __init__(self,attrib: dict = None, caption:tuple= None,imgdatas:dict = None):
+
+        super().__init__(attrib,caption)
+        self.imgdatas = imgdatas
+        self.__initialize()
+    
+    def __initialize(self):
+        
+        if self.imgdatas is not None:
+            elt=etree.Element('img')
+            for k,v in self.imgdatas.items():
+                elt.set(k,v )
+            self.root.insert(0,elt)
+        
 class Graphic(Figure):
     
     def __init__(self,att: dict = None, capt:tuple= None):
@@ -114,7 +123,7 @@ class Graphic(Figure):
         graph = pygal.Pie(self,self.conf,style=self.styl,disable_xml_declaration=True,no_prefix=True)
         for k,v in data.items():
             graph.add(k,v)
-        self.root.append(graph.render_tree())
+        self.root.insert(0,graph.render_tree())
     
     def bar(self,*datas :dict, xlabels:list =None):
         
@@ -125,7 +134,7 @@ class Graphic(Figure):
             for k,v in data.items():
                 graph.add(k,v)
     
-        self.root.append(graph.render_tree())
+        self.root.insert(0,graph.render_tree())
         
     
     def frmap(self,title:str='titre',*datas :dict):
@@ -134,7 +143,7 @@ class Graphic(Figure):
         for data in datas:
             carte.add(title,data)
 
-        self.root.append(carte.render_tree())
+        self.root.insert(0,carte.render_tree())
 
 #---------------------------------------------------------------------
 #program
@@ -142,11 +151,14 @@ class Graphic(Figure):
 if __name__ == '__main__' :
 
     
-    Y=Figure({'id':'test'},('photo','La plus belle'),{'class':'test-pic','src':'images/img_3.jpg','alt':'image de montagne'})
-    
+    partie1=Section()
+
     graph1=Graphic({'id':'graph-1'},('graphic','test'))
-    graph1.bar({'test':[23,24,45]})
+    graph1.bar({'test':[23,24,45,45,34]})
 
-    print(Y)
+    graph2=Graphic({'id':'graph-2'},('carte','Répartition des autres'))
+    photo=Image(None,('image','Un beau soleil'),{'src':'images/grass.jpg'})
+    
+    partie1.add_conteneur(photo,graph1,graph2)
 
-    print(graph1)
+    print(partie1)

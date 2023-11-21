@@ -1,12 +1,11 @@
 #!/usr/bin/python3
 """ Static web site generator with lxml """
 
-import csv
 from lxml.html import fromstring, tostring, fragment_fromstring
 from lxml import etree
 from markdown import markdown
 from pathlib import Path
-from conteneur import Conteneur,Section,Article,Aside,Figure,Graphic
+from conteneur import Section,Article,Aside,Graphic
 
 class WebSite:
     """ Website object: it contains the logo, name of the project,
@@ -26,16 +25,18 @@ class WebSite:
         self.language=language
         self.pages={WebSite.firstpage:Page(self.name)}
 
-    def get_home(self):
+    def get_page(self,name:str):
 
-        return self.pages[WebSite.firstpage]
+        return self.pages[name]
 
-    def add_page(self, title):
-        """Add a simple web page. """
+    def add_page(self, *titles:str):
+        """Add a new web page. """
 
-        p= self.pages[title] = Page(title)
-
-        return p
+        for t in titles:
+            if isinstance(t,Page):
+                self.pages[t.title]=t
+            else:
+                self.pages[t] = Page(t)
 
     def _builder_page(self,page):
 
@@ -89,8 +90,7 @@ class WebSite:
 
     def __repr__(self):
 
-        for page in self.pages:
-            return str(self.pages)
+        return str(self.pages.keys())
 
 class Page():
 
@@ -143,6 +143,22 @@ class Page():
             else:
                 print("Not a valid container !!")
 
+    def add_mdcontent(self,*inputfile: any, tag: str = None, tag_attr: str=None):
+        
+	    if tag is not None :
+	        balise=tag
+	    else:
+	        balise=False
+
+	    for file in inputfile :
+	        infile=Path(file)
+	        contenu=infile.read_text(encoding='UTF8')
+	        md=fragment_fromstring(markdown(contenu,extensions=['extra']),create_parent=balise)
+	
+	        if tag_attr is not None : 
+	            html.set('id',tag_attr)
+	        self.doc['main'].append(md)
+
     def __str__(self):
 
         return str(tostring(self.doc['body'],
@@ -157,6 +173,10 @@ if __name__ == '__main__' :
     
     site=WebSite()
     A=Page('arp')
-    site.add_page(A)
-    print(A)
+    site.add_page(A,'test')
+    page1=site.get_page('index')
+    page1.add_conteneur(Section(),Article())
+    print(page1)
     print(site)
+    site.write_to_file()
+
