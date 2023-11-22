@@ -5,7 +5,7 @@ from lxml.html import fromstring, tostring, fragment_fromstring
 from lxml import etree
 from markdown import markdown
 from pathlib import Path
-from conteneur import Conteneur,Section,Article,Aside,Graphic
+from conteneur import Conteneur,Section,Article,Aside,Graphic,Img
 
 class WebSite:
     """ Website object: it contains the logo, name of the project,
@@ -17,7 +17,6 @@ class WebSite:
 
     def __init__(self,name='Example', logofile='images/logo.svg',
                  cssfile='styles.css', language='fr'):
-
         self.name=name
         self.logofile= logofile
         self.md_dir= Path.cwd() / 'Markdown'
@@ -124,20 +123,3 @@ class Page(Conteneur):
                       pretty_print=True,
                       doctype='<!DOCTYPE html>',
                       encoding='unicode'))
-
-#---------------------------------------------------------------------
-#program
-
-if __name__ == '__main__' :
-    
-    site=WebSite()
-    A=Page('arp')
-    site.add_page(A,'test')
-    page1=site.get_page('index')
-    page1.add_conteneur(Section(),Article())
-    page1.add_mdcontent('Markdown/article.md',tag='article')
-
-    print(page1)
-    print(site)
-    site.write_to_file()
-
