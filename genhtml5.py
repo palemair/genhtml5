@@ -5,7 +5,7 @@ from lxml.html import fromstring, tostring, fragment_fromstring
 from lxml import etree
 from markdown import markdown
 from pathlib import Path
-from conteneur import Conteneur,Section,Article,Aside,Graphic,Img
+from HTML.conteneur import Conteneur,Section,Article,Aside,Graphic,Img
 
 class WebSite:
     """ Website object: it contains the logo, name of the project,
@@ -48,10 +48,10 @@ class WebSite:
                         {'rel':'stylesheet',
                          'href':self.cssfile,
                          'type':'text/css'})
-        page.doc['html'].insert(0,head)
+        page.doc.insert(0,head)
 
         #header of the page
-        el=page.doc['pageheader']
+        el=page.header
         nav=etree.SubElement(el,'nav')
         home = etree.SubElement(nav,'a',href=f'{WebSite.firstpage}.html',title='home')
         logo = etree.parse(self.logofile)
@@ -70,7 +70,7 @@ class WebSite:
                 li.append(element)
 
         #footer of the page
-        elt=page.doc['pagefooter']
+        elt=page.footer
         infile=self.md_dir / 'footer.md'
         html=infile.read_text(encoding='UTF8')
         md=fragment_fromstring(markdown(html,extensions=['extra']),create_parent='div')
@@ -80,7 +80,7 @@ class WebSite:
 
         for name,page in self.pages.items():
             self._builder_page(page)
-            texte=tostring(page.doc['html'],
+            texte=tostring(page.doc,
                            pretty_print=False,
                            doctype='<!DOCTYPE html>',
                            encoding='unicode')
@@ -98,24 +98,20 @@ class Page(Conteneur):
     def __init__(self,title):
 
         self.title=title
-        self.doc=self._builder()
-        self.root=self.doc['main']
+        self.doc,self.header,self.main,self.footer=self._builder()
+        self.root=self.main
 
     def _builder(self):
 
-        root=etree.Element('html')
-        body=etree.SubElement(root,'body',)
+        html=etree.Element('html')
+        body=etree.SubElement(html,'body',)
         header=etree.SubElement(body,'header')
         header.set('id','pageheader')
         main=etree.SubElement(body,'main')
         footer=etree.SubElement(body,'footer')
         footer.set('id','pagefooter')
 
-        return {'html':root,
-                'body':body,
-                'main':main,
-                'pageheader':header,
-                'pagefooter':footer}
+        return html,header,main,footer
 
     def __str__(self):
 

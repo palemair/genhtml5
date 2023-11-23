@@ -101,7 +101,7 @@ class Figure(Conteneur):
     
 class Img(Figure):
 
-    def __init__(self,attrib: dict = None, caption:tuple= None,imgdatas:dict = None):
+    def __init__(self,caption:tuple= None,imgdatas:dict = None,attrib: dict = {'class':'image'}) :
 
         super().__init__(attrib,caption)
         self.imgdatas = imgdatas
@@ -117,7 +117,7 @@ class Img(Figure):
         
 class Graphic(Figure):
     
-    def __init__(self,att: dict = None, capt:tuple= None):
+    def __init__(self,capt:tuple= None,att: dict = {'class':'graph'}):
 
         super().__init__(att,capt)
         self.conf = pygal.Config(
@@ -139,21 +139,27 @@ class Graphic(Figure):
                       major_guide_stroke_dasharray = 5.1
                       )
         
-    def pie(self,data :dict):
+    def pie(self,*datas :tuple):
         
         graph = pygal.Pie(self,self.conf,style=self.styl,disable_xml_declaration=True,no_prefix=True)
-        for k,v in data.items():
-            graph.add(k,v)
+        for data in datas:
+            graph.add(*data)
         self.root.insert(0,graph.render_tree())
     
-    def bar(self,*datas :dict, xlabels:list =None):
+    def line(self,*datas :tuple, xlabels:list =None):
+        
+        graph = pygal.Line(self,self.conf,style=self.styl,disable_xml_declaration=True,no_prefix=True)
+        for data in datas:
+            graph.add(*data)
+        self.root.insert(0,graph.render_tree())
+    
+    def bar(self,*datas :tuple, xlabels:list =None):
         
         legendcol =len(datas)
         graph = pygal.Bar(self.conf,style=self.styl,legend_at_bottom_columns=legendcol, xlabels=xlabels,disable_xml_declaration=True,no_prefix=True)
 
         for data in datas:
-            for k,v in data.items():
-                graph.add(k,v)
+            graph.add(*data)
     
         self.root.insert(0,graph.render_tree())
         
@@ -165,21 +171,3 @@ class Graphic(Figure):
             carte.add(title,data)
 
         self.root.insert(0,carte.render_tree())
-
-#---------------------------------------------------------------------
-#program
-
-if __name__ == '__main__' :
-
-    
-    partie1=Section()
-
-    graph1=Graphic({'id':'graph-1'},('graphic','test'))
-    graph1.bar({'test':[23,24,45,45,34]})
-
-    graph2=Graphic({'id':'graph-2'},('carte','Répartition des autres'))
-    photo=Img(None,('image','Un beau soleil'),{'src':'images/grass.jpg'})
-    
-    partie1.add_conteneur(photo,graph1,graph2)
-
-    print(partie1)
