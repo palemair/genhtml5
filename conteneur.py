@@ -136,8 +136,8 @@ class Graphic(Figure):
                       guide_stroke_color = 'gray',
                       guide_stroke_dasharray = 3.1,
                       major_guide_stroke_color = 'gray',
-                      major_guide_stroke_dasharray = 5.1
-                      )
+                      major_guide_stroke_dasharray = 5.1,
+                      colors=('#0000CD', '#E8537A', '#E95355', '#E87653', '#E89B53'))
         
     def pie(self,*datas :tuple):
         
@@ -148,7 +148,9 @@ class Graphic(Figure):
     
     def line(self,*datas :tuple, xlabels:list =None):
         
-        graph = pygal.Line(self,self.conf,style=self.styl,disable_xml_declaration=True,no_prefix=True)
+        legendcol =len(datas)
+        graph = pygal.Line(self.conf,style=self.styl,legend_at_bottom_columns=legendcol, xlabels=xlabels,disable_xml_declaration=True,no_prefix=True)
+        
         for data in datas:
             graph.add(*data)
         self.root.insert(0,graph.render_tree())
@@ -160,14 +162,12 @@ class Graphic(Figure):
 
         for data in datas:
             graph.add(*data)
-    
         self.root.insert(0,graph.render_tree())
-        
     
-    def frmap(self,title:str='titre',*datas :dict):
+    def frmap(self,*datas :tuple):
         
         carte=pygal.maps.fr.Departments(self.conf,style=self.styl)
         for data in datas:
-            carte.add(title,data)
+            carte.add(*data)
 
         self.root.insert(0,carte.render_tree())
