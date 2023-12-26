@@ -36,17 +36,18 @@ class Mixconteneur:
     def _link_list(self, elt : str = 'article', target :str = 'h2'):
         """create linked element list from an element """
 
-        div = etree.Element('div')
-        liste_elt = [ elt for elt in self.root.iterfind(f'.//{elt}') ]
+        ul = etree.Element('ul')
+        liste_elt = ( elt for elt in self.root.iterfind(f'.//{elt}') )
         
         for elt in liste_elt:
             titre= elt.find(f'.//{target}')
             if titre is not None :
                 elt.set('id',titre.text)
-                a=etree.SubElement(div,'a',href=f'{self.title}.html#{titre.text}',title=f'Aller à {titre.text}')
+                li=etree.SubElement(ul,'li')
+                a=etree.SubElement(li,'a',href=f'{self.title}.html#{titre.text}',title=f'Aller à {titre.text}')
                 a.text=titre.text
 
-        return div
+        return ul
 
 
 class Conteneur(Mixconteneur):
@@ -133,11 +134,12 @@ class Graphic(Figure):
                       opacity_hover = 1, 
                       legend_font_size = 20,
                       major_label_font_size = 18,
-                      guide_stroke_color = 'gray',
+                      # guide_stroke_color = 'gray',
                       guide_stroke_dasharray = 3.1,
-                      major_guide_stroke_color = 'gray',
+                      # major_guide_stroke_color = 'gray',
                       major_guide_stroke_dasharray = 5.1,
-                      colors=('#0000CD', '#E8537A', '#E95355', '#E87653', '#E89B53'))
+                      # colors=('#0000CD', '#E8537A', '#E95355', '#E87653', '#E89B53')i
+                      )
         
     def pie(self,*datas :tuple):
         

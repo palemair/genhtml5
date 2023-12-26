@@ -15,9 +15,10 @@ class WebSite:
     #globals
     firstpage='index'
 
-    def __init__(self,name='Example', logofile='images/logo.svg',
+    def __init__(self,name='LOREM IPSUM',h1='gros titre',logofile=None,
                  cssfile='styles.css', language='fr'):
         self.name=name
+        self.h1=h1
         self.logofile= logofile
         self.md_dir= Path.cwd() / 'Markdown'
         self.cssfile=cssfile
@@ -25,18 +26,17 @@ class WebSite:
         self.pages={WebSite.firstpage:Page(self.name)}
 
     def get_page(self,name:str):
-
         return self.pages[name]
 
     def add_page(self, *titles:str):
         """Add a new web page. """
-
+        
         for t in titles:
             if isinstance(t,Page):
                 self.pages[t.title]=t
             else:
                 self.pages[t] = Page(t)
-
+         
     def _builder_page(self,page):
 
         #head of the page
@@ -53,21 +53,22 @@ class WebSite:
         #header of the page
         el=page.header
         nav=etree.SubElement(el,'nav')
-        home = etree.SubElement(nav,'a',href=f'{WebSite.firstpage}.html',title='home')
-        logo = etree.parse(self.logofile)
-        home.append(logo.getroot())
-        
         ul=etree.SubElement(nav,'ul')
+        homeli = etree.SubElement(ul,'li')
+        lia=etree.SubElement(homeli,'a',href=f'{WebSite.firstpage}.html',title='Accueil')
+        lia.text=self.name
 
         for k,v in self.pages.items():
             if k != WebSite.firstpage:
                 li=etree.SubElement(ul,'li')
-                li.set('class','drop-down')
                 a=etree.SubElement(li,'a',href=f'{k}.html',title=f'Aller à {k}')
                 a.text=k
                 element=v._link_list()
-                element.set('class','under')
                 li.append(element)
+            else:
+                titre = etree.Element('h1')
+                titre.text=self.h1
+                v.main.insert(0,titre)
 
         #footer of the page
         elt=page.footer
@@ -75,13 +76,33 @@ class WebSite:
         html=infile.read_text(encoding='UTF8')
         md=fragment_fromstring(markdown(html,extensions=['extra']),create_parent='div')
         elt.append(md)
-  
+    
+    @staticmethod 
+    def draw_logo(hauteur:int,name:str):
+            
+        logo=etree.Element("svg",width='300',height=str(hauteur),xmlns="http://www.w3.org/2000/svg")
+        etree.SubElement(logo,"circle",cx="16",cy="14",r="13",fill="navy")
+        x,y=5,14
+        string=f'{x} {y},{x+5} {y-5},{x+10} {y},{x+5} {y+5}' 
+        etree.SubElement(logo,"polyline",points=string,fill="ghostwhite")
+        x,y=17,14
+        string=f'{x} {y},{x+5} {y-5},{x+10} {y},{x+5} {y+5}' 
+        etree.SubElement(logo,"polyline",points=string,fill="ghostwhite")
+        x,y=11,8
+        string=f'{x} {y},{x+5} {y-5},{x+10} {y},{x+5} {y+5}' 
+        etree.SubElement(logo,"polyline",points=string,fill="ghostwhite")
+        x,y=11,20
+        string=f'{x} {y},{x+5} {y-5},{x+10} {y},{x+5} {y+5}' 
+        etree.SubElement(logo,"polyline",points=string,fill="ghostwhite")
+
+        return logo
+
     def write_to_file(self):
 
         for name,page in self.pages.items():
             self._builder_page(page)
             texte=tostring(page.doc,
-                           pretty_print=False,
+                           pretty_print=True,
                            doctype='<!DOCTYPE html>',
                            encoding='unicode')
             outfile=Path.cwd() / f'{name}.html'
@@ -106,10 +127,8 @@ class Page(Conteneur):
         html=etree.Element('html')
         body=etree.SubElement(html,'body',)
         header=etree.SubElement(body,'header')
-        header.set('id','pageheader')
         main=etree.SubElement(body,'main')
         footer=etree.SubElement(body,'footer')
-        footer.set('id','pagefooter')
 
         return html,header,main,footer
 
