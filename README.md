@@ -39,6 +39,8 @@ page1.add_conteneur(section2)
 
 site.write_to_file()
 ```
+![example] (genthtml5/screenshot.jpg "homepage")
+
 
 with a bit of css, this is the result :
 
