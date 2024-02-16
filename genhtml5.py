@@ -65,10 +65,6 @@ class WebSite:
                 a.text=k
                 element=v._link_list()
                 li.append(element)
-            else:
-                titre = etree.Element('h1')
-                titre.text=self.h1
-                v.main.insert(0,titre)
 
         #footer of the page
         elt=page.footer
