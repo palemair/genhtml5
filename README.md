@@ -39,7 +39,7 @@ page1.add_conteneur(section2)
 
 site.write_to_file()
 ```
-
 with a bit of css, this is the result :
 
+![screenshot] (screenshot.jpg)
 
