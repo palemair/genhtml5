@@ -41,6 +41,6 @@ site.write_to_file()
 ```
 with a bit of css, this is the result :
 
-![example] (screenshot.jpg)
+![example] (../main/screenshot.jpg)
 
 
