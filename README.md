@@ -11,7 +11,7 @@ it needs work to be achieved.
 
 ## How use it
 
-only 2 files : genhtml5 and conteneur.
+You just have to import this file **genhtml5** (it is in HTML folder in this example).
 
 ```python
 from HTML.genhtml5 import WebSite, Page, Section, Article, Img, Graphic
@@ -43,4 +43,11 @@ with a bit of css, this is the result :
 
 ![example](../main/screenshot.jpg)
 
+## To do
+
+add more graphical objects
+
+change the assignement style because it's redundant at the moment
+
+...
 
