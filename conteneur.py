@@ -1,11 +1,11 @@
 #!/usr/bin/python3
 """ Mixin used in Page and conteneur """
 
-import pygal
 from lxml.html import fromstring, tostring, fragment_fromstring
 from lxml import etree
 from markdown import markdown
 from pathlib import Path
+import pygal
 
 class Mixconteneur:
     
@@ -48,7 +48,6 @@ class Mixconteneur:
                 a.text=titre.text
 
         return ul
-
 
 class Conteneur(Mixconteneur):
     "HTML conteneur : section, article, aside...."
@@ -166,10 +165,10 @@ class Graphic(Figure):
             graph.add(*data)
         self.root.insert(0,graph.render_tree())
     
-    def frmap(self,*datas :tuple):
+    # def frmap(self,*datas :tuple):
         
-        carte=pygal.maps.fr.Departments(self.conf,style=self.styl)
-        for data in datas:
-            carte.add(*data)
+    #     carte=pygal.maps.fr.Departments(self.conf,style=self.styl)
+    #     for data in datas:
+    #         carte.add(*data)
 
-        self.root.insert(0,carte.render_tree())
+    #     self.root.insert(0,carte.render_tree())

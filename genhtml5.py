@@ -1,11 +1,12 @@
 #!/usr/bin/python3
 """ Static web site generator with lxml """
 
+# import pygal
 from lxml.html import fromstring, tostring, fragment_fromstring
 from lxml import etree
 from markdown import markdown
 from pathlib import Path
-from HTML.conteneur import Conteneur,Section,Article,Aside,Graphic,Img
+from conteneur import Conteneur,Section,Article,Aside,Graphic,Img
 
 class WebSite:
     """ Website object: it contains the logo, name of the project,
@@ -18,6 +19,8 @@ class WebSite:
     def __init__(self,name='LOREM IPSUM',h1='gros titre',logofile=None,
                  cssfile='styles.css', language='fr'):
         self.name=name
+        self.outdir = Path.home() / 'Bureau' / name
+        self.outdir.mkdir(parents = True, exist_ok = True)
         self.h1=h1
         self.logofile= logofile
         self.md_dir= Path.cwd() / 'Markdown'
@@ -44,10 +47,10 @@ class WebSite:
         etree.SubElement(head,'meta',charset='utf-8')
         headtitle=etree.SubElement(head,'title')
         headtitle.text = page.title
-        etree.SubElement(head,'link',
-                        {'rel':'stylesheet',
-                         'href':self.cssfile,
-                         'type':'text/css'})
+        style = etree.SubElement(head,'style')
+        infile = Path(self.cssfile)
+        if infile.is_file():
+            style.text = infile.read_text('utf-8')
         page.doc.insert(0,head)
 
         #header of the page
@@ -101,7 +104,7 @@ class WebSite:
                            pretty_print=True,
                            doctype='<!DOCTYPE html>',
                            encoding='unicode')
-            outfile=Path.cwd() / f'{name}.html'
+            outfile=self.outdir / f'{name}.html'
             outfile.write_text(texte)
 
     def __repr__(self):
