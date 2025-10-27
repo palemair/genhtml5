@@ -1,12 +1,11 @@
-#!/usr/bin/python3
+#!./env/bin/python3
 """ Static web site generator with lxml """
 
-# import pygal
 from lxml.html import fromstring, tostring, fragment_fromstring
 from lxml import etree
 from markdown import markdown
 from pathlib import Path
-from conteneur import Conteneur,Section,Article,Aside,Graphic,Img
+from conteneur import Conteneur,Svg,Section,Article,Aside,Graphic,Img
 
 class WebSite:
     """ Website object: it contains the logo, name of the project,
@@ -19,8 +18,7 @@ class WebSite:
     def __init__(self,name='LOREM IPSUM',h1='gros titre',logofile=None,
                  cssfile='styles.css', language='fr'):
         self.name=name
-        self.outdir = Path.home() / 'Bureau' / name
-        self.outdir.mkdir(parents = True, exist_ok = True)
+        self.outdir = Path.cwd().parent
         self.h1=h1
         self.logofile= logofile
         self.md_dir= Path.cwd() / 'Markdown'
@@ -39,6 +37,7 @@ class WebSite:
                 self.pages[t.title]=t
             else:
                 self.pages[t] = Page(t)
+        return self
          
     def _builder_page(self,page):
 
@@ -72,30 +71,10 @@ class WebSite:
         #footer of the page
         elt=page.footer
         infile=self.md_dir / 'footer.md'
-        html=infile.read_text(encoding='UTF8')
-        md=fragment_fromstring(markdown(html,extensions=['extra']),create_parent='div')
+        foot=infile.read_text(encoding='UTF8')
+        md=fragment_fromstring(markdown(foot,extensions=['extra']),create_parent='div')
         elt.append(md)
     
-    @staticmethod 
-    def draw_logo(hauteur:int,name:str):
-            
-        logo=etree.Element("svg",width='300',height=str(hauteur),xmlns="http://www.w3.org/2000/svg")
-        etree.SubElement(logo,"circle",cx="16",cy="14",r="13",fill="navy")
-        x,y=5,14
-        string=f'{x} {y},{x+5} {y-5},{x+10} {y},{x+5} {y+5}' 
-        etree.SubElement(logo,"polyline",points=string,fill="ghostwhite")
-        x,y=17,14
-        string=f'{x} {y},{x+5} {y-5},{x+10} {y},{x+5} {y+5}' 
-        etree.SubElement(logo,"polyline",points=string,fill="ghostwhite")
-        x,y=11,8
-        string=f'{x} {y},{x+5} {y-5},{x+10} {y},{x+5} {y+5}' 
-        etree.SubElement(logo,"polyline",points=string,fill="ghostwhite")
-        x,y=11,20
-        string=f'{x} {y},{x+5} {y-5},{x+10} {y},{x+5} {y+5}' 
-        etree.SubElement(logo,"polyline",points=string,fill="ghostwhite")
-
-        return logo
-
     def write_to_file(self):
 
         for name,page in self.pages.items():

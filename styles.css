@@ -71,6 +71,10 @@ main {
     margin:0 auto;
 }
 
+svg {
+    background-color:red;
+
+}
 section {
     display:grid;
     grid-template-columns: 1fr 2fr;
