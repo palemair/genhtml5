@@ -1,10 +1,13 @@
 #!./env/bin/python3
 
-import xml.etree.ElementTree as et
+from abc import ABC, abstractmethod
 from pathlib import Path
-from markdown import markdown
+import pathlib
 
-class Container():
+import xml.etree.ElementTree as et
+from markdown import Markdown
+
+class Container(ABC):
     
     "Abstract element container"
     
@@ -22,36 +25,49 @@ class Container():
         for container in containers:
             if (not isinstance(container,Container)):
                 raise TypeError("Need an xml.etree.element !!")
-            if (container._root.tag == 'main'):
-                raise ValueError("You can only assign 'main' in a page")
+            match container._root.tag:
+                case  'main' :
+                    raise ValueError(f"You can only assign '{container._root.tag}' in a page")
             self._root.append(container._root)
         return self
 
 #abstract class htmlcontainer
-class HtmlContainer(Container):
+class HtmlSection(Container):
     
     "HTML conteneur : section, article, aside...."
     
-    def set_text(self,input_text : str):
+    def add_from_markdown(self,input_content : any, parent : str = 'div', **kwargs):
 
-        self._root.text = input_text
-        
-    def add_markdown(self,input_content : any, tag : str = 'div', **kwargs):
-        
-	    for file in inputfile :
-	        infile=Path(file)
-	        content=infile.read_text(encoding='UTF8')
-	        md=fragment_fromstring(markdown(contenu,extensions=['extra']),create_parent=tag)
-	
-	        if tag_attr is not None : 
-	            html.set('id',tag_attr)
-	        self._root.append(md)
+        """Add element from a Markdown File or string """
+        md = Markdown()
+        elem = et.Element(parent)
+
+        if(isinstance(input_content,pathlib.PosixPath)):
+            if(input_content.exists()):
+                s = input_content.read_text(encoding = 'utf-8')
+            else:
+                raise TypeError("file not exist")
+
+        elif (isinstance(input_content,str)):
+            s = input_content
+
+        else:
+            raise ValueError("You must provide str, Path !!")
+
+        s = s.split(sep="\n")
+        s = [md.convert(x) for x in s if x != '']
+        elist = [et.fromstring(x) for x in s]
+
+        for element in elist:
+            elem.append(element)
+
+        self._root.append(elem)
 
     def _link_list(self, elt : str = 'div', target : str = 'h2'):
         """create linked element list from an element """
 
         ul = et.Element('ul')
-        liste_elt = ( elt for elt in self.root.iterfind(f'.//{elt}') )
+        liste_elt = ( elt for elt in self._root.iterfind(f'.//{elt}') )
         
         for elt in liste_elt:
             titre= elt.find(f'.//{target}')
@@ -62,6 +78,18 @@ class HtmlContainer(Container):
                 a.text=titre.text
 
         return ul
+
+class HtmlText(Container):
+
+    "HTML text container : p,h1,..."
+    def __init__(self,tag : str,content : str = '', **kwargs):
+
+        super().__init__(tag,**kwargs)
+        self._root.text = content
+
+    def set_text(self,input_text : str):
+
+        self._root.text = input_text
 
 #abstract class svgcontainer
 class SvgContainer(Container):
@@ -125,64 +153,85 @@ class SvgContainer(Container):
 class ContainerFactory:
 
     @staticmethod
-    def html_tag(tag : str, **kwargs) -> HtmlContainer :
-        return HtmlContainer(tag, **kwargs)
+    def html_section(tag : str, **kwargs) -> HtmlSection :
+
+        match tag:
+            case 'main':
+                raise ValueError("You can only assign 'main' with a Page object !!")
+            case _:
+                return HtmlSection(tag, **kwargs)
+
+    @staticmethod
+    def html_text(tag : str, **kwargs) -> HtmlText :
+
+        return HtmlText(tag, **kwargs)
 
     @staticmethod
     def svg_tag(tag : str, **kwargs) -> SvgContainer :
-        return SvgContainer(tag, **kwargs)
 
-#Concrete html container 
-class Page(HtmlContainer):
+        match tag:
+            case 'svg':
+                raise ValueError("You can only assign 'svg' with a Svg object !!")
+            case _:
+                return SvgContainer(tag, **kwargs)
+
+
+#Concrete html section 
+class Page(HtmlSection):
 
     """Simple html page object"""
     def __init__(self,**kwargs):
         super().__init__('main',**kwargs)
 
-class Section(HtmlContainer):
+class Section(HtmlSection):
     
     def __init__(self, **kwargs):
         super().__init__('section', **kwargs)
 
-class Article(HtmlContainer):
+class Article(HtmlSection):
     
     def __init__(self, **kwargs):
         super().__init__('article', **kwargs)
 
-class Paragraph(HtmlContainer):
+#Concrete html text 
+class Paragraph(HtmlText):
     
     def __init__(self,input_str : str = '', **kwargs):
-        super().__init__('p',**kwargs)
-        self.set_text(input_str)
+        super().__init__('p',input_str,**kwargs)
 
-class Img(HtmlContainer):
-
-    def __init__(self,imgdatas:dict = None,attrib: dict = {'class':'image'}) :
-
-        super().__init__(attrib,caption)
-        self.imgdatas = imgdatas
-        self.__initialize()
+class h1(HtmlText):
     
-    def __initialize(self):
-        
-        if self.imgdatas is not None:
-            elt=etree.Element('img')
-            for k,v in self.imgdatas.items():
-                elt.set(k,v )
-            self._root.insert(0,elt)
+    def __init__(self,input_str : str = '', **kwargs):
+        super().__init__('h1',input_str,**kwargs)
 
-class Figure(HtmlContainer):
+# class Img(HtmlContainer):
+
+#     def __init__(self,imgdatas:dict = None,attrib: dict = {'class':'image'}) :
+
+#         super().__init__(attrib,caption)
+#         self.imgdatas = imgdatas
+#         self.__initialize()
     
-    def __init__(self,caption_class : str = None, caption_text : str = None, **kwargs):
-
-        super().__init__('figure', **kwargs)
+#     def __initialize(self):
         
-        if self.caption is not None:
-            fc=et.Element('figcaption')
-            fc.set('class', caption_class)
-            fc.text= caption_text
+#         if self.imgdatas is not None:
+#             elt=etree.Element('img')
+#             for k,v in self.imgdatas.items():
+#                 elt.set(k,v )
+#             self._root.insert(0,elt)
 
-        self.root.append(fc)
+# class Figure(HtmlContainer):
+    
+#     def __init__(self,caption_class : str = None, caption_text : str = None, **kwargs):
+
+#         super().__init__('figure', **kwargs)
+        
+#         if self.caption is not None:
+#             fc=et.Element('figcaption')
+#             fc.set('class', caption_class)
+#             fc.text= caption_text
+
+#         self.root.append(fc)
 
 #Concrete Svg container 
 class Svg(SvgContainer):
@@ -216,7 +265,7 @@ class Svg(SvgContainer):
         file = Path.home() / 'Bureau' / dest_file
         file = file.with_suffix('.svg')
 
-        with file.open('w') as f:
+        with file.open('w',encoding = 'utf-8') as f:
             f.write('<?xml version = "1.0" encoding="UTF-8">\n')
             f.write('<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"\n "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">\n')
             f.write(f"{et.tostring(self._root,encoding = 'unicode')}")
@@ -247,27 +296,28 @@ class Use(SvgContainer):
         attrib.update(kwargs)
         super().__init__('use', **attrib)
 
-class Texte(SvgContainer):
+class Texte(HtmlText):
 
-    def __init__(self, xpos : int, ypos : int , texte : str, **kwargs):
+    """ Must be use in svg only"""
+    def __init__(self, xpos : int, ypos : int , text : str, **kwargs):
         
         attrib = dict(x = str(xpos), y = str(ypos))
         attrib.update(kwargs)
         super().__init__('text', **attrib)
-        self._root.text = texte
+        self.set_text(text)
 
 if __name__ == '__main__':
 
-    fabrik = ContainerFactory()
-
-    r = fabrik.svg_tag('rect')
-    p=Paragraph()
-    p.set_text("Le premier paragraphe !!")
     home = Page()
-    home.append(p)
+    home.append(h1("title"))
+    home.add_from_markdown("#Mardownprojet",'article')
+    home.add_from_markdown(Path('Markdown/projet.md'))
+    home.add_from_markdown(Path('Markdown/footer.md'))
+
     home.append(Paragraph("Un deuxieme"))
 
     dessin = Svg()
+
     linestyle = {'stroke' : 'blue', 'stroke-width' : '2px', 'fill' : 'gray'}
     groupe1 = Groupe(**linestyle)
 
@@ -283,7 +333,6 @@ if __name__ == '__main__':
 
     dessin.append(Use("stric", transform="translate(200,150) scale(3) rotate(17)"))
 
-    print(dessin)
     dessin.to_svg_file('test.svg')
     
     home.append(dessin)
