@@ -6,12 +6,11 @@ from markdown import markdown
 
 class Container():
     
-    "Abstract XML container"
+    "Abstract element container"
     
-    def __init__(self,tag : str, title : str, **kwargs):
+    def __init__(self,tag : str, **kwargs):
 
         self._root = et.Element(tag,**kwargs)
-        self._title = title
 
     def __repr__(self)-> str:
         
@@ -21,15 +20,19 @@ class Container():
     def append(self,*containers):
         
         for container in containers:
-            if (isinstance(container._root,et.Element)):
-                self._root.append(container._root)
+            if (not isinstance(container,Container)):
+                raise TypeError("Need an xml.etree.element !!")
+            if (container._root.tag == 'main'):
+                raise ValueError("You can only assign 'main' in a page")
+            self._root.append(container._root)
         return self
 
+#abstract class htmlcontainer
 class HtmlContainer(Container):
     
     "HTML conteneur : section, article, aside...."
     
-    def add_text(self,input_text : str):
+    def set_text(self,input_text : str):
 
         self._root.text = input_text
         
@@ -60,6 +63,7 @@ class HtmlContainer(Container):
 
         return ul
 
+#abstract class svgcontainer
 class SvgContainer(Container):
 
     "Svg generic container : Use, defs, animate...."
@@ -67,7 +71,6 @@ class SvgContainer(Container):
     def basicshape(self,forme : str, *args,**kwargs):
         
         coord = {}
-
         match forme:
             case "line":
                 if(len(args) == 4):
@@ -121,34 +124,36 @@ class SvgContainer(Container):
 
 class ContainerFactory:
 
-    def html_tag(tag : str, title = '',**kwargs) -> HtmlContainer :
-        return HtmlContainer(tag, title, **kwargs)
+    @staticmethod
+    def html_tag(tag : str, **kwargs) -> HtmlContainer :
+        return HtmlContainer(tag, **kwargs)
 
-    def svg_tag(tag : str, title = '',**kwargs) -> SvgContainer :
-        return SvgContainer(tag, title, **kwargs)
+    @staticmethod
+    def svg_tag(tag : str, **kwargs) -> SvgContainer :
+        return SvgContainer(tag, **kwargs)
 
 #Concrete html container 
 class Page(HtmlContainer):
 
     """Simple html page object"""
-    def __init__(self,title : str = 'Lorem Ipsum',**kwargs):
-        super().__init__('main',title,**kwargs)
+    def __init__(self,**kwargs):
+        super().__init__('main',**kwargs)
 
 class Section(HtmlContainer):
     
-    def __init__(self,title :str = '',**kwargs):
-        super().__init__('section',title, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__('section', **kwargs)
 
 class Article(HtmlContainer):
     
-    def __init__(self,title :str = '',**kwargs):
-        super().__init__('article',title, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__('article', **kwargs)
 
 class Paragraph(HtmlContainer):
     
-    def __init__(self,input_str : str = '',title : str = '',**kwargs):
-        super().__init__('p',title,**kwargs)
-        self.add_text(input_str)
+    def __init__(self,input_str : str = '', **kwargs):
+        super().__init__('p',**kwargs)
+        self.set_text(input_str)
 
 class Img(HtmlContainer):
 
@@ -184,14 +189,14 @@ class Svg(SvgContainer):
 
     "Svg : Element root of the drawing"
 
-    def __init__(self, width : int = 1000, height : int = 1000,title : str = '',cssfile = ''):
+    def __init__(self, width : int = 1000, height : int = 1000, cssfile = ''):
         
         attrib_svg ={'version' : "1.1",
                      'baseProfile' : "full",
                      'xmlns' : "http://www.w3.org/2000/svg"                                                                                         
                      }
 
-        super().__init__('svg', title, **attrib_svg)
+        super().__init__('svg', **attrib_svg)
         self.width = width
         self.height = height
         self.css = Path(cssfile)
@@ -220,35 +225,35 @@ class Svg(SvgContainer):
 
     def _close(self):
         
-        self.root.set('width' , '100%')
-        self.root.set('height' , '100%')
-        self.root.set('viewBox', f"0 0 {self.width} {self.height}")
+        self._root.set('width' , '100%')
+        self._root.set('height' , '100%')
+        self._root.set('viewBox', f"0 0 {self.width} {self.height}")
 
 class Groupe(SvgContainer):
 
-    def __init__(self,title : str = '', **kwargs):
-        super().__init__('g',title, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__('g', **kwargs)
 
 class Defs(SvgContainer):
 
-    def __init__(self,title : str = '', **kwargs):
-        super().__init__('defs', title, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__('defs', **kwargs)
 
 class Use(SvgContainer):
 
-    def __init__(self, href : str,title : str = '',**kwargs):
+    def __init__(self, href : str, **kwargs):
         
         attrib = {"xlink:href" : f'#{href}'}
         attrib.update(kwargs)
-        super().__init__('use', title, **attrib)
+        super().__init__('use', **attrib)
 
 class Texte(SvgContainer):
 
-    def __init__(self, xpos : int, ypos : int , texte : str,title : str = '', **kwargs):
+    def __init__(self, xpos : int, ypos : int , texte : str, **kwargs):
         
         attrib = dict(x = str(xpos), y = str(ypos))
         attrib.update(kwargs)
-        super().__init__('text', title, **attrib)
+        super().__init__('text', **attrib)
         self._root.text = texte
 
 if __name__ == '__main__':
@@ -257,12 +262,10 @@ if __name__ == '__main__':
 
     r = fabrik.svg_tag('rect')
     p=Paragraph()
-    p.add_text("Le premier paragraphe !!")
+    p.set_text("Le premier paragraphe !!")
     home = Page()
     home.append(p)
     home.append(Paragraph("Un deuxieme"))
-
-    print(home)
 
     dessin = Svg()
     linestyle = {'stroke' : 'blue', 'stroke-width' : '2px', 'fill' : 'gray'}

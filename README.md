@@ -41,8 +41,6 @@ site.write_to_file()
 ```
 with a bit of css, this is the result :
 
-![example](../main/screenshot.jpg)
-
 ## To do
 
 add more graphical objects
